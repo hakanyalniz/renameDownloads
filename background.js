@@ -1,21 +1,28 @@
-chrome.downloads.onDeterminingFilename.addListener((downloadItem, suggest) => {
-  const tabId = downloadItem.tabId;
+async function getCurrentTab() {
+  let queryOptions = { active: true, lastFocusedWindow: true };
+  // `tab` will either be a `tabs.Tab` instance or `undefined`.
+  let [tab] = await chrome.tabs.query(queryOptions);
+  return tab;
+}
 
-  // if the tabId cannot be fetched or found, use default name
-  if (tabId === undefined || tabId < 0) {
-    suggest();
-    return;
-  }
+chrome.downloads.onDeterminingFilename.addListener(
+  async (downloadItem, suggest) => {
+    const currentTab = await getCurrentTab();
 
-  chrome.tabs.get(tabId, (tab) => {
-    // If the tab cannot be found or title is not found, use default name
-    if (!tab || !tab.title) {
+    // If the tab cannot be found or title is not found
+    // or if it is undefined or title length is not enough, use default name
+    if (
+      !currentTab ||
+      !currentTab.title ||
+      currentTab === undefined ||
+      currentTab.title.length <= 0
+    ) {
       suggest();
       return;
     }
 
     // Trim the title to be useable as a file name
-    const safeTitle = tab.title.replace(/[<>:"/\\|?*]+/g, "").trim();
+    const safeTitle = currentTab.title.replace(/[<>:"/\\|?*]+/g, "").trim();
 
     // If safeTitle does not exist, use default name
     if (!safeTitle) {
@@ -34,7 +41,7 @@ chrome.downloads.onDeterminingFilename.addListener((downloadItem, suggest) => {
       filename: safeTitle + extension,
       conflictAction: "uniquify",
     });
-  });
 
-  return true;
-});
+    return true;
+  },
+);
