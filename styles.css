@@ -1,0 +1,8 @@
+.container {
+  display: flex;
+  gap: 10px;
+}
+
+#switch-indicator {
+  border-radius: 10px;
+}
