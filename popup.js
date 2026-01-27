@@ -13,8 +13,8 @@ function sendChromeMessage(switchButton, indicatorBox) {
   switchButton.addEventListener("click", async () => {
     const toggleSwitch = localStorage.getItem("toggleSwitch") === "true";
 
-    // Send the message
-    chrome.runtime.sendMessage({ type: "TOGGLE_SWITCH" });
+    // Send the message, enabling or disabling according to toggle
+    chrome.runtime.sendMessage({ type: !toggleSwitch ? "enable" : "disable" });
 
     // Update local storage
     localStorage.setItem("toggleSwitch", String(!toggleSwitch));

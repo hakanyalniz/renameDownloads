@@ -1,5 +1,3 @@
-let extensionSwitch = false;
-
 async function getCurrentTab() {
   let queryOptions = { active: true, lastFocusedWindow: true };
   // `tab` will either be a `tabs.Tab` instance or `undefined`.
@@ -8,19 +6,16 @@ async function getCurrentTab() {
 }
 
 chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
-  if (message.type === "TOGGLE_SWITCH") {
-    extensionSwitch = !extensionSwitch;
+  // Turn the extension on or off by switch
+  // if off, then use default name
+  if (message.type === "enable") {
+    chrome.downloads.onDeterminingFilename.addListener(changeFileName);
+  } else if (message.type === "disable") {
+    chrome.downloads.onDeterminingFilename.removeListener(changeFileName);
   }
 });
 
-chrome.downloads.onDeterminingFilename.addListener((downloadItem, suggest) => {
-  // Turn the extension on or off by switch
-  // if off, then use default name
-  if (!extensionSwitch) {
-    suggest();
-    return;
-  }
-
+function changeFileName(downloadItem, suggest) {
   getCurrentTab().then((currentTab) => {
     // If the tab cannot be found or title is not found
     // or if it is undefined or title length is not enough, use default name
@@ -60,4 +55,4 @@ chrome.downloads.onDeterminingFilename.addListener((downloadItem, suggest) => {
   });
 
   return true;
-});
+}
