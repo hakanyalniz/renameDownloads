@@ -3,7 +3,7 @@
   "description": "Change downloaded file names to other options",
   "version": "0.0.1",
   "manifest_version": 3,
-  "permissions": ["downloads", "tabs"],
+  "permissions": ["downloads", "tabs", "storage"],
   "background": {
     "service_worker": "background.js"
   },

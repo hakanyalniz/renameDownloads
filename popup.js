@@ -1,6 +1,29 @@
-document.getElementById("switch-button");
+document.addEventListener("DOMContentLoaded", async () => {
+  const switchButton = document.getElementById("switch-button");
+  const indicatorBox = document.getElementById("switch-indicator");
 
-const indicatorBox = document.getElementById("switch-indicator");
-indicatorBox.style.width = "30px";
-indicatorBox.style.height = "30px";
-indicatorBox.style.backgroundColor = "red";
+  // Get the switch from local storage to update to current state
+  const toggleSwitch = localStorage.getItem("toggleSwitch") === "true";
+
+  sendChromeMessage(switchButton, indicatorBox);
+  updateIndicator(indicatorBox, toggleSwitch);
+});
+
+function sendChromeMessage(switchButton, indicatorBox) {
+  switchButton.addEventListener("click", async () => {
+    const toggleSwitch = localStorage.getItem("toggleSwitch") === "true";
+
+    // Send the message
+    chrome.runtime.sendMessage({ type: "TOGGLE_SWITCH" });
+
+    // Update local storage
+    localStorage.setItem("toggleSwitch", String(!toggleSwitch));
+    // it is inverted, because we just clicked the switch
+    updateIndicator(indicatorBox, !toggleSwitch);
+  });
+}
+
+function updateIndicator(indicatorBox, toggleSwitch) {
+  // Switch the color of the indicator when toggled
+  indicatorBox.style.backgroundColor = toggleSwitch ? "green" : "red";
+}

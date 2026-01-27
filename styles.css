@@ -5,4 +5,7 @@
 
 #switch-indicator {
   border-radius: 10px;
+  width: 30px;
+  height: 30px;
+  background-color: green;
 }

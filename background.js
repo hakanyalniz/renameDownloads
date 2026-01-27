@@ -1,4 +1,4 @@
-const extensionSwitch = true;
+let extensionSwitch = false;
 
 async function getCurrentTab() {
   let queryOptions = { active: true, lastFocusedWindow: true };
@@ -7,7 +7,20 @@ async function getCurrentTab() {
   return tab;
 }
 
+chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
+  if (message.type === "TOGGLE_SWITCH") {
+    extensionSwitch = !extensionSwitch;
+  }
+});
+
 chrome.downloads.onDeterminingFilename.addListener((downloadItem, suggest) => {
+  // Turn the extension on or off by switch
+  // if off, then use default name
+  if (!extensionSwitch) {
+    suggest();
+    return;
+  }
+
   getCurrentTab().then((currentTab) => {
     // If the tab cannot be found or title is not found
     // or if it is undefined or title length is not enough, use default name
