@@ -34,7 +34,7 @@ function changeFileName(downloadItem, suggest) {
     const safeTitle = currentTab.title
       .replace(/[<>:"/\\|?*]+/g, "")
       .trim()
-      .slice(0, 100);
+      .slice(0, 50);
 
     // If safeTitle does not exist, use default name
     if (!safeTitle) {
@@ -56,3 +56,5 @@ function changeFileName(downloadItem, suggest) {
 
   return true;
 }
+
+// Make title more customizable
