@@ -5,10 +5,8 @@ async function getCurrentTab() {
   return tab;
 }
 
-chrome.downloads.onDeterminingFilename.addListener(
-  async (downloadItem, suggest) => {
-    const currentTab = await getCurrentTab();
-
+chrome.downloads.onDeterminingFilename.addListener((downloadItem, suggest) => {
+  getCurrentTab().then((currentTab) => {
     // If the tab cannot be found or title is not found
     // or if it is undefined or title length is not enough, use default name
     if (
@@ -22,7 +20,11 @@ chrome.downloads.onDeterminingFilename.addListener(
     }
 
     // Trim the title to be useable as a file name
-    const safeTitle = currentTab.title.replace(/[<>:"/\\|?*]+/g, "").trim();
+    // Also slice it to keep it short
+    const safeTitle = currentTab.title
+      .replace(/[<>:"/\\|?*]+/g, "")
+      .trim()
+      .slice(0, 100);
 
     // If safeTitle does not exist, use default name
     if (!safeTitle) {
@@ -39,9 +41,8 @@ chrome.downloads.onDeterminingFilename.addListener(
     // Finally suggest new file name
     suggest({
       filename: safeTitle + extension,
-      conflictAction: "uniquify",
     });
+  });
 
-    return true;
-  },
-);
+  return true;
+});
