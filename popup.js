@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const { toggleSwitch } = await chrome.storage.local.get({
     toggleSwitch: false,
   });
-  console.log("toggleSwitch", toggleSwitch);
 
   // This is for when we just clicked the popup, update the color to current toggleSwitch
   sendChromeMessage(switchButton, indicatorBox);

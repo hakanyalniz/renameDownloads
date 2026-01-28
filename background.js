@@ -1,14 +1,17 @@
 chrome.downloads.onDeterminingFilename.addListener(checkToggle);
 
-async function checkToggle(downloadItem, suggest) {
-  const { toggleSwitch } = await chrome.storage.local.get("toggleSwitch");
+function checkToggle(downloadItem, suggest) {
+  chrome.storage.local.get("toggleSwitch").then((result) => {
+    const { toggleSwitch } = result;
 
-  if (!toggleSwitch) {
-    suggest();
-    return;
-  }
+    if (!toggleSwitch) {
+      suggest();
+      return;
+    }
 
-  changeFileName(downloadItem, suggest);
+    changeFileName(downloadItem, suggest);
+  });
+  return true;
 }
 
 // chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
@@ -66,8 +69,6 @@ function changeFileName(downloadItem, suggest) {
       filename: safeTitle + extension,
     });
   });
-
-  return true;
 }
 
 // Make title more customizable
