@@ -14,16 +14,6 @@ function checkToggle(downloadItem, suggest) {
   return true;
 }
 
-// chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
-//   // Turn the extension on or off by switch
-//   // if off, then use default name
-//   if (message.type === "enable") {
-//     chrome.downloads.onDeterminingFilename.addListener(changeFileName);
-//   } else if (message.type === "disable") {
-//     chrome.downloads.onDeterminingFilename.removeListener(changeFileName);
-//   }
-// });
-
 async function getCurrentTab() {
   let queryOptions = { active: true, lastFocusedWindow: true };
   // `tab` will either be a `tabs.Tab` instance or `undefined`.
@@ -72,10 +62,3 @@ function changeFileName(downloadItem, suggest) {
 }
 
 // Make title more customizable
-
-// The problem: A lot of lag when first used among others.
-
-// Finals thoughts: The problem occurs when a switch happens between inactive and active, it would make sense for this to happen,
-// though it would be puzzling still, if the download listener was on. But that is seemingly not so, it seems a second problem is that,
-// there is a mismatch between when the listener is active or not. Another problem entirely is that, even when the listener is on,
-// and the extension turns active, at times, the file name still does not change.

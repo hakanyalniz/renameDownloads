@@ -17,9 +17,6 @@ function sendChromeMessage(switchButton, indicatorBox) {
   switchButton.addEventListener("click", async () => {
     const { toggleSwitch } = await chrome.storage.local.get("toggleSwitch");
 
-    // Send the message, enabling or disabling according to toggle
-    // chrome.runtime.sendMessage({ type: !toggleSwitch ? "enable" : "disable" });
-
     // Update local storage
     await chrome.storage.local.set({ toggleSwitch: !toggleSwitch });
     // it is inverted, because we just clicked the switch
