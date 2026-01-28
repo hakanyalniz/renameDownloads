@@ -2,28 +2,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   const switchButton = document.getElementById("switch-button");
   const indicatorBox = document.getElementById("switch-indicator");
 
-  // Get the switch from local storage to update to current state
-  const toggleSwitch = localStorage.getItem("toggleSwitch") === "true";
+  // Get the switch from local storage to update the current state
+  const { toggleSwitch } = await chrome.storage.local.get({
+    toggleSwitch: false,
+  });
+  console.log("toggleSwitch", toggleSwitch);
 
+  // This is for when we just clicked the popup, update the color to current toggleSwitch
   sendChromeMessage(switchButton, indicatorBox);
   updateIndicator(indicatorBox, toggleSwitch);
 });
 
+// This is for when we clicked the button, and changed the toggle indicator and the local storage
 function sendChromeMessage(switchButton, indicatorBox) {
   switchButton.addEventListener("click", async () => {
-    const toggleSwitch = localStorage.getItem("toggleSwitch") === "true";
+    const { toggleSwitch } = await chrome.storage.local.get("toggleSwitch");
 
     // Send the message, enabling or disabling according to toggle
-    chrome.runtime.sendMessage({ type: !toggleSwitch ? "enable" : "disable" });
+    // chrome.runtime.sendMessage({ type: !toggleSwitch ? "enable" : "disable" });
 
     // Update local storage
-    localStorage.setItem("toggleSwitch", String(!toggleSwitch));
+    await chrome.storage.local.set({ toggleSwitch: !toggleSwitch });
     // it is inverted, because we just clicked the switch
     updateIndicator(indicatorBox, !toggleSwitch);
   });
 }
 
 function updateIndicator(indicatorBox, toggleSwitch) {
-  // Switch the color of the indicator when toggled
   indicatorBox.style.backgroundColor = toggleSwitch ? "green" : "red";
 }
