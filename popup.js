@@ -20,9 +20,9 @@ function sendChromeMessage(switchButton, indicatorBox) {
     // Update local storage
     await chrome.storage.local.set({ toggleSwitch: !toggleSwitch });
 
-    chrome.runtime.sendMessage({
-      type: "TOGGLE_CHANGED",
-    });
+    // chrome.runtime.sendMessage({
+    //   type: "TOGGLE_CHANGED",
+    // });
 
     // it is inverted, because we just clicked the switch
     updateIndicator(indicatorBox, !toggleSwitch);
