@@ -1,24 +1,44 @@
-chrome.downloads.onDeterminingFilename.addListener(checkToggle);
-
-function checkToggle(downloadItem, suggest) {
-  chrome.storage.local.get("toggleSwitch").then((result) => {
-    const { toggleSwitch } = result;
-
-    if (!toggleSwitch) {
-      suggest();
-      return;
-    }
-
-    changeFileName(downloadItem, suggest);
-  });
+// Wrapper function for changeFileName, so we can safely add or remove listeners to it
+function onDetermine(downloadItem, suggest) {
+  changeFileName(downloadItem, suggest);
   return true;
 }
 
-async function getCurrentTab() {
+chrome.runtime.onStartup.addListener(() => {
+  checkToggle();
+});
+
+// A manual check, in case the browser crashes and needs to load extensions again
+// this will make sure that the toggleSwitch is properly set up
+checkToggle();
+
+chrome.storage.local.onChanged.addListener((changes) => {
+  if (changes.toggleSwitch) {
+    checkToggle();
+  }
+});
+
+// After fetching toggleSwitch, add or remove listener based on its boolean value
+function checkToggle() {
+  let toggleSwitch;
+  chrome.storage.local.get("toggleSwitch", (result) => {
+    toggleSwitch = result.toggleSwitch ?? false;
+
+    if (toggleSwitch) {
+      chrome.downloads.onDeterminingFilename.addListener(onDetermine);
+    } else {
+      chrome.downloads.onDeterminingFilename.removeListener(onDetermine);
+    }
+  });
+}
+
+function getCurrentTab() {
   let queryOptions = { active: true, lastFocusedWindow: true };
   // `tab` will either be a `tabs.Tab` instance or `undefined`.
-  let [tab] = await chrome.tabs.query(queryOptions);
-  return tab;
+  return chrome.tabs.query(queryOptions).then((result) => {
+    let [tab] = result;
+    return tab;
+  });
 }
 
 function changeFileName(downloadItem, suggest) {
@@ -59,6 +79,7 @@ function changeFileName(downloadItem, suggest) {
       filename: safeTitle + extension,
     });
   });
+  return true;
 }
 
 // Make title more customizable
