@@ -1,3 +1,8 @@
+const button = document.getElementById("sendLength");
+button.addEventListener("click", () => {
+  lengthInputField();
+});
+
 document.addEventListener("DOMContentLoaded", async () => {
   const switchButton = document.getElementById("switch-button");
   const indicatorBox = document.getElementById("switch-indicator");
@@ -27,4 +32,12 @@ function sendChromeMessage(switchButton, indicatorBox) {
 
 function updateIndicator(indicatorBox, toggleSwitch) {
   indicatorBox.style.backgroundColor = toggleSwitch ? "green" : "red";
+}
+
+// This is for when we use the input field for selecting rename length
+function lengthInputField() {
+  const input = document.getElementById("length");
+
+  console.log(input.value, button);
+  return true;
 }
