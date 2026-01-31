@@ -10,7 +10,8 @@
 }
 
 .toggle-container {
-  margin: 0 auto;
+  display: flex;
+  align-items: center;
   padding: 10px;
 }
 
@@ -24,4 +25,31 @@
   width: 30px;
   height: 30px;
   background-color: green;
+}
+
+button {
+  appearance: none;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+
+  background-color: #5d62ac;
+  color: #ffffff;
+
+  font: inherit;
+  font-weight: 500;
+
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
+}
+
+button:hover {
+  background-color: #1d4ed8;
+}
+
+button:active {
+  transform: translateY(1px);
 }
