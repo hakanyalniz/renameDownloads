@@ -1,3 +1,5 @@
+let titleLength = 100;
+
 // Wrapper function for changeFileName, so we can safely add or remove listeners to it
 function onDetermine(downloadItem, suggest) {
   changeFileName(downloadItem, suggest);
@@ -12,9 +14,13 @@ chrome.runtime.onStartup.addListener(() => {
 // this will make sure that the toggleSwitch is properly set up
 checkToggle();
 
+// When changes are made to either toggle or title length, call their respective functions
+// that will handle the process of change
 chrome.storage.local.onChanged.addListener((changes) => {
   if (changes.toggleSwitch) {
     checkToggle();
+  } else if (changes.titleLength) {
+    getInputLength();
   }
 });
 
@@ -41,6 +47,16 @@ function getCurrentTab() {
   });
 }
 
+function getInputLength() {
+  chrome.storage.local.get("titleLength").then((result) => {
+    if (!result) {
+      titleLength = 100;
+    } else {
+      titleLength = result.titleLength;
+    }
+  });
+}
+
 function changeFileName(downloadItem, suggest) {
   getCurrentTab().then((currentTab) => {
     // If the tab cannot be found or title is not found
@@ -60,7 +76,7 @@ function changeFileName(downloadItem, suggest) {
     const safeTitle = currentTab.title
       .replace(/[<>:"/\\|?*]+/g, "")
       .trim()
-      .slice(0, 100);
+      .slice(0, titleLength);
 
     // If safeTitle does not exist, use default name
     if (!safeTitle) {
@@ -81,5 +97,3 @@ function changeFileName(downloadItem, suggest) {
   });
   return true;
 }
-
-// Make title more customizable

@@ -1,8 +1,3 @@
-const button = document.getElementById("sendLength");
-button.addEventListener("click", () => {
-  lengthInputField();
-});
-
 document.addEventListener("DOMContentLoaded", async () => {
   const switchButton = document.getElementById("switch-button");
   const indicatorBox = document.getElementById("switch-indicator");
@@ -15,6 +10,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // This is for when we just clicked the popup, update the color to current toggleSwitch
   sendChromeMessage(switchButton, indicatorBox);
   updateIndicator(indicatorBox, toggleSwitch);
+
+  // For length input
+  lengthInputField();
 });
 
 // This is for when we clicked the button, and changed the toggle indicator and the local storage
@@ -36,8 +34,23 @@ function updateIndicator(indicatorBox, toggleSwitch) {
 
 // This is for when we use the input field for selecting rename length
 function lengthInputField() {
-  const input = document.getElementById("length");
+  // Button for sending length
 
-  console.log(input.value, button);
-  return true;
+  const lengthButton = document.getElementById("sendLength");
+  lengthButton.addEventListener("click", async () => {
+    let inputValue = Number(document.getElementById("length").value);
+
+    if (
+      typeof inputValue != "number" ||
+      inputValue >= 1000 ||
+      !inputValue ||
+      inputValue <= 0
+    ) {
+      document.getElementById("length").value = "Please enter a proper number.";
+      console.log("Please enter a proper number");
+      return false;
+    }
+
+    await chrome.storage.local.set({ titleLength: inputValue });
+  });
 }
