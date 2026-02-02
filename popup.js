@@ -2,6 +2,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const switchButton = document.getElementById("switch-button");
   const indicatorBox = document.getElementById("switch-indicator");
 
+  // The input field will get the current title length as placeholder
+  const titleLength = await chrome.storage.local.get("titleLength");
+  document.getElementById("length").value = titleLength.titleLength;
+
   // Get the switch from local storage to update the current state
   const { toggleSwitch } = await chrome.storage.local.get({
     toggleSwitch: false,

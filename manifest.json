@@ -3,7 +3,7 @@
   "description": "Change downloaded file names to other options",
   "version": "0.0.2",
   "manifest_version": 3,
-  "permissions": ["downloads", "activeTab", "storage"],
+  "permissions": ["downloads", "tabs", "storage"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],

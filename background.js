@@ -1,46 +1,30 @@
+chrome.downloads.onDeterminingFilename.addListener(onDetermine);
+
+let toggleSwitch = false;
 let titleLength = 100;
 
 // Wrapper function for changeFileName, so we can safely add or remove listeners to it
 // Send message to get current tab artist name for specific sites
 function onDetermine(downloadItem, suggest) {
-  changeFileName(downloadItem, suggest);
+  chrome.storage.local.get("toggleSwitch", (result) => {
+    toggleSwitch = result.toggleSwitch ?? false;
+
+    if (!toggleSwitch) {
+      suggest();
+      return false;
+    }
+    changeFileName(downloadItem, suggest);
+  });
   return true;
 }
-
-chrome.runtime.onStartup.addListener(() => {
-  checkToggle();
-});
-
-// A manual check, in case the browser crashes and needs to load extensions again
-// this will make sure that the toggleSwitch is properly set up
-checkToggle();
 
 // When changes are made to either toggle or title length, call their respective functions
 // that will handle the process of change
 chrome.storage.local.onChanged.addListener((changes) => {
-  if (changes.toggleSwitch) {
-    checkToggle();
+  if (changes.titleLength) {
+    getInputLength();
   }
-  // else if (changes.titleLength) {
-  //   getInputLength();
-  // }
 });
-
-// After fetching toggleSwitch, add or remove listener based on its boolean value
-function checkToggle() {
-  let toggleSwitch;
-  chrome.storage.local.get("toggleSwitch", (result) => {
-    console.log(result.toggleSwitch);
-
-    toggleSwitch = result.toggleSwitch ?? false;
-
-    if (toggleSwitch) {
-      chrome.downloads.onDeterminingFilename.addListener(onDetermine);
-    } else {
-      chrome.downloads.onDeterminingFilename.removeListener(onDetermine);
-    }
-  });
-}
 
 function getCurrentTab() {
   let queryOptions = { active: true, lastFocusedWindow: true };
@@ -51,21 +35,20 @@ function getCurrentTab() {
   });
 }
 
-// function getInputLength() {
-//   chrome.storage.local.get("titleLength").then((result) => {
-//     if (!result) {
-//       titleLength = 100;
-//     } else {
-//       titleLength = result.titleLength;
-//     }
-//   });
-// }
+function getInputLength() {
+  return chrome.storage.local.get("titleLength").then((result) => {
+    if (!result) {
+      return (titleLength = 100);
+    } else {
+      return (titleLength = result.titleLength);
+    }
+  });
+}
 
 function changeFileName(downloadItem, suggest) {
-  getCurrentTab().then((currentTab) => {
+  getCurrentTab().then(async (currentTab) => {
     // If the tab cannot be found or title is not found
     // or if it is undefined or title length is not enough, use default name
-
     console.log(currentTab);
 
     if (
@@ -83,7 +66,7 @@ function changeFileName(downloadItem, suggest) {
     const safeTitle = currentTab.title
       .replace(/[<>:"/\\|?*]+/g, "")
       .trim()
-      .slice(0, 100);
+      .slice(0, await getInputLength());
 
     // If safeTitle does not exist, use default name
     if (!safeTitle) {
@@ -108,6 +91,17 @@ function changeFileName(downloadItem, suggest) {
 // Bug, if extension is reset and it is toggled on, the listener doesnt get attached for some reason
 // for some reason the tab object lacks title, is fixed when toggled on and off
 // clear up the file and code later
+
+// the above bug appears to cause many of the problems right now, add other features after that
+// one of the reasons the problem is probably occuring is somehow bad activation/listener
+
+// It seems the problem of toggle on or off is not the main cause of 10 second hang
+
+// it seems there are two separate problems at play here
+// first, after restarting the extension somehow the currentTab info gets reduced, which causes the extension to fail
+// if we restart the extension and try to use it, this failure will result in 10 second hang
+
+// Length is not working always
 
 // function onDetermine(downloadItem, suggest) {
 //   getCurrentTab().then((currentTab) => {
