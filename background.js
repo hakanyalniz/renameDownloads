@@ -88,20 +88,7 @@ function changeFileName(downloadItem, suggest) {
   return true;
 }
 
-// Bug, if extension is reset and it is toggled on, the listener doesnt get attached for some reason
-// for some reason the tab object lacks title, is fixed when toggled on and off
-// clear up the file and code later
-
-// the above bug appears to cause many of the problems right now, add other features after that
-// one of the reasons the problem is probably occuring is somehow bad activation/listener
-
-// It seems the problem of toggle on or off is not the main cause of 10 second hang
-
-// it seems there are two separate problems at play here
-// first, after restarting the extension somehow the currentTab info gets reduced, which causes the extension to fail
-// if we restart the extension and try to use it, this failure will result in 10 second hang
-
-// Length is not working always
+// Make titles more customizable
 
 // function onDetermine(downloadItem, suggest) {
 //   getCurrentTab().then((currentTab) => {
