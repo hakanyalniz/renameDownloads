@@ -1,6 +1,7 @@
 let titleLength = 100;
 
 // Wrapper function for changeFileName, so we can safely add or remove listeners to it
+// Send message to get current tab artist name for specific sites
 function onDetermine(downloadItem, suggest) {
   getCurrentTab().then((currentTab) => {
     chrome.tabs.sendMessage(
@@ -76,28 +77,6 @@ function getInputLength() {
   });
 }
 
-// Send message to get current tab artist name for specific sites
-function testingSpecifiSite() {
-  getCurrentTab().then((currentTab) => {
-    chrome.tabs.sendMessage(
-      currentTab.id,
-      { action: "GET_PAGE_DATA" },
-      (response) => {
-        // Check if the content script replied
-        if (chrome.runtime.lastError || !response) {
-          console.log("An error occured");
-        } else {
-          if (response == "default") {
-            return false;
-          } else {
-            console.log("Extracted Text:", response.text);
-          }
-        }
-      },
-    );
-  });
-}
-
 function changeFileName(
   downloadItem,
   suggest,
@@ -150,3 +129,4 @@ function changeFileName(
 }
 
 // Bug, if extension is reset and it is toggled on, the listener doesnt get attached for some reason
+// clear up the file and code later
