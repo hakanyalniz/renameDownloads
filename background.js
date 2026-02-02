@@ -1,34 +1,9 @@
 let titleLength = 100;
-let activeTabID = null;
-
-// Update the cache whenever the user switches tabs
-chrome.tabs.onActivated.addListener((activeInfo) => {
-  activeTabID = activeInfo.tabId;
-});
 
 // Wrapper function for changeFileName, so we can safely add or remove listeners to it
 // Send message to get current tab artist name for specific sites
 function onDetermine(downloadItem, suggest) {
-  console.log(activeTabID);
-
-  chrome.tabs.sendMessage(
-    activeTabID,
-    { action: "GET_PAGE_DATA" },
-    (response) => {
-      // Check if the content script replied
-      if (chrome.runtime.lastError || !response) {
-        console.log("An error occured");
-        changeFileName(downloadItem, suggest);
-      } else {
-        if (response == "default") {
-          changeFileName(downloadItem, suggest);
-        } else {
-          changeFileName(downloadItem, suggest, response.text);
-        }
-      }
-    },
-  );
-
+  changeFileName(downloadItem, suggest);
   return true;
 }
 
@@ -45,9 +20,10 @@ checkToggle();
 chrome.storage.local.onChanged.addListener((changes) => {
   if (changes.toggleSwitch) {
     checkToggle();
-  } else if (changes.titleLength) {
-    getInputLength();
   }
+  // else if (changes.titleLength) {
+  //   getInputLength();
+  // }
 });
 
 // After fetching toggleSwitch, add or remove listener based on its boolean value
@@ -75,20 +51,23 @@ function getCurrentTab() {
   });
 }
 
-function getInputLength() {
-  chrome.storage.local.get("titleLength").then((result) => {
-    if (!result) {
-      titleLength = 100;
-    } else {
-      titleLength = result.titleLength;
-    }
-  });
-}
+// function getInputLength() {
+//   chrome.storage.local.get("titleLength").then((result) => {
+//     if (!result) {
+//       titleLength = 100;
+//     } else {
+//       titleLength = result.titleLength;
+//     }
+//   });
+// }
 
-function changeFileName(downloadItem, suggest, suggestedTitle = "default") {
+function changeFileName(downloadItem, suggest) {
   getCurrentTab().then((currentTab) => {
     // If the tab cannot be found or title is not found
     // or if it is undefined or title length is not enough, use default name
+
+    console.log(currentTab);
+
     if (
       !currentTab ||
       !currentTab.title ||
@@ -104,7 +83,7 @@ function changeFileName(downloadItem, suggest, suggestedTitle = "default") {
     const safeTitle = currentTab.title
       .replace(/[<>:"/\\|?*]+/g, "")
       .trim()
-      .slice(0, titleLength);
+      .slice(0, 100);
 
     // If safeTitle does not exist, use default name
     if (!safeTitle) {
@@ -119,18 +98,35 @@ function changeFileName(downloadItem, suggest, suggestedTitle = "default") {
       : "";
 
     // Finally suggest new file name
-    if (suggestedTitle == "default") {
-      suggest({
-        filename: safeTitle + extension,
-      });
-    } else {
-      suggest({
-        filename: suggestedTitle + extension,
-      });
-    }
+    suggest({
+      filename: safeTitle + extension,
+    });
   });
   return true;
 }
 
 // Bug, if extension is reset and it is toggled on, the listener doesnt get attached for some reason
+// for some reason the tab object lacks title, is fixed when toggled on and off
 // clear up the file and code later
+
+// function onDetermine(downloadItem, suggest) {
+//   getCurrentTab().then((currentTab) => {
+//     chrome.tabs.sendMessage(
+//       currentTab.id,
+//       { action: "GET_PAGE_DATA" },
+//       (response) => {
+//         // Check if the content script replied
+//         if (chrome.runtime.lastError || !response) {
+//           console.log("An error occured");
+//         } else {
+//           if (response == "default") {
+//             changeFileName(downloadItem, suggest, currentTab);
+//           } else {
+//             changeFileName(downloadItem, suggest, currentTab, response.text);
+//           }
+//         }
+//       },
+//     );
+//   });
+//   return true;
+// }
