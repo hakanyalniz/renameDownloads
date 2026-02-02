@@ -1,10 +1,8 @@
-import { fetchGelbooruArtistName } from "./utils.js";
-
 let titleLength = 100;
 
 // Wrapper function for changeFileName, so we can safely add or remove listeners to it
 function onDetermine(downloadItem, suggest) {
-  decideDownloadMethod();
+  testingSpecifiSite();
   changeFileName(downloadItem, suggest);
   return true;
 }
@@ -31,6 +29,8 @@ chrome.storage.local.onChanged.addListener((changes) => {
 function checkToggle() {
   let toggleSwitch;
   chrome.storage.local.get("toggleSwitch", (result) => {
+    console.log(result.toggleSwitch);
+
     toggleSwitch = result.toggleSwitch ?? false;
 
     if (toggleSwitch) {
@@ -60,17 +60,23 @@ function getInputLength() {
   });
 }
 
-function decideDownloadMethod() {
+function testingSpecifiSite() {
   getCurrentTab().then((currentTab) => {
-    chrome.scripting.executeScript(
-      {
-        target: { tabId: currentTab.id },
-        func: () => {
-          return fetchGelbooruArtistName(document);
-        },
-      },
-      (results) => {
-        console.log("Found text:", results[0].result);
+    chrome.tabs.sendMessage(
+      currentTab.id,
+      { action: "GET_PAGE_DATA" },
+      (response) => {
+        console.log(response);
+
+        // Check if the content script replied
+        if (chrome.runtime.lastError || !response) {
+          console.log(
+            "Could not reach content script. Fallback to tab title:",
+            currentTab.title,
+          );
+        } else {
+          console.log("Extracted Text:", response.text);
+        }
       },
     );
   });
@@ -116,3 +122,5 @@ function changeFileName(downloadItem, suggest) {
   });
   return true;
 }
+
+// Bug, if extension is reset and it is toggled on, the listener doesnt get attached for some reason
