@@ -1,26 +1,34 @@
 let titleLength = 100;
+let activeTabID = null;
+
+// Update the cache whenever the user switches tabs
+chrome.tabs.onActivated.addListener((activeInfo) => {
+  activeTabID = activeInfo.tabId;
+});
 
 // Wrapper function for changeFileName, so we can safely add or remove listeners to it
 // Send message to get current tab artist name for specific sites
 function onDetermine(downloadItem, suggest) {
-  getCurrentTab().then((currentTab) => {
-    chrome.tabs.sendMessage(
-      currentTab.id,
-      { action: "GET_PAGE_DATA" },
-      (response) => {
-        // Check if the content script replied
-        if (chrome.runtime.lastError || !response) {
-          console.log("An error occured");
+  console.log(activeTabID);
+
+  chrome.tabs.sendMessage(
+    activeTabID,
+    { action: "GET_PAGE_DATA" },
+    (response) => {
+      // Check if the content script replied
+      if (chrome.runtime.lastError || !response) {
+        console.log("An error occured");
+        changeFileName(downloadItem, suggest);
+      } else {
+        if (response == "default") {
+          changeFileName(downloadItem, suggest);
         } else {
-          if (response == "default") {
-            changeFileName(downloadItem, suggest, currentTab);
-          } else {
-            changeFileName(downloadItem, suggest, currentTab, response.text);
-          }
+          changeFileName(downloadItem, suggest, response.text);
         }
-      },
-    );
-  });
+      }
+    },
+  );
+
   return true;
 }
 
@@ -77,54 +85,50 @@ function getInputLength() {
   });
 }
 
-function changeFileName(
-  downloadItem,
-  suggest,
-  currentTab,
-  suggestedTitle = "default",
-) {
-  // If the tab cannot be found or title is not found
-  // or if it is undefined or title length is not enough, use default name
-  if (
-    !currentTab ||
-    !currentTab.title ||
-    currentTab === undefined ||
-    currentTab.title.length <= 0
-  ) {
-    suggest();
-    return;
-  }
+function changeFileName(downloadItem, suggest, suggestedTitle = "default") {
+  getCurrentTab().then((currentTab) => {
+    // If the tab cannot be found or title is not found
+    // or if it is undefined or title length is not enough, use default name
+    if (
+      !currentTab ||
+      !currentTab.title ||
+      currentTab === undefined ||
+      currentTab.title.length <= 0
+    ) {
+      suggest();
+      return;
+    }
 
-  // Trim the title to be useable as a file name
-  // Also slice it to keep it short
-  const safeTitle = currentTab.title
-    .replace(/[<>:"/\\|?*]+/g, "")
-    .trim()
-    .slice(0, titleLength);
+    // Trim the title to be useable as a file name
+    // Also slice it to keep it short
+    const safeTitle = currentTab.title
+      .replace(/[<>:"/\\|?*]+/g, "")
+      .trim()
+      .slice(0, titleLength);
 
-  // If safeTitle does not exist, use default name
-  if (!safeTitle) {
-    suggest();
-    return;
-  }
+    // If safeTitle does not exist, use default name
+    if (!safeTitle) {
+      suggest();
+      return;
+    }
 
-  // Fetches the file extension (like jpeg or png)
-  const originalFilename = downloadItem.filename;
-  const extension = originalFilename.includes(".")
-    ? "." + originalFilename.split(".").pop()
-    : "";
+    // Fetches the file extension (like jpeg or png)
+    const originalFilename = downloadItem.filename;
+    const extension = originalFilename.includes(".")
+      ? "." + originalFilename.split(".").pop()
+      : "";
 
-  // Finally suggest new file name
-  if (suggestedTitle == "default") {
-    suggest({
-      filename: safeTitle + extension,
-    });
-  } else {
-    suggest({
-      filename: suggestedTitle + extension,
-    });
-  }
-
+    // Finally suggest new file name
+    if (suggestedTitle == "default") {
+      suggest({
+        filename: safeTitle + extension,
+      });
+    } else {
+      suggest({
+        filename: suggestedTitle + extension,
+      });
+    }
+  });
   return true;
 }
 

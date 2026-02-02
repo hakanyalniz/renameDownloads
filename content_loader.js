@@ -11,6 +11,7 @@ function getSiteData() {
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   if (request.action === "GET_PAGE_DATA") {
     const artistName = getSiteData();
+
     try {
       sendResponse({ text: artistName.innerText });
     } catch (error) {
