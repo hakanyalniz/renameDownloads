@@ -1,7 +1,10 @@
+import { fetchGelbooruArtistName } from "./utils.js";
+
 let titleLength = 100;
 
 // Wrapper function for changeFileName, so we can safely add or remove listeners to it
 function onDetermine(downloadItem, suggest) {
+  decideDownloadMethod();
   changeFileName(downloadItem, suggest);
   return true;
 }
@@ -54,6 +57,22 @@ function getInputLength() {
     } else {
       titleLength = result.titleLength;
     }
+  });
+}
+
+function decideDownloadMethod() {
+  getCurrentTab().then((currentTab) => {
+    chrome.scripting.executeScript(
+      {
+        target: { tabId: currentTab.id },
+        func: () => {
+          return fetchGelbooruArtistName(document);
+        },
+      },
+      (results) => {
+        console.log("Found text:", results[0].result);
+      },
+    );
   });
 }
 

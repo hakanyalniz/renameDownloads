@@ -3,9 +3,11 @@
   "description": "Change downloaded file names to other options",
   "version": "0.0.2",
   "manifest_version": 3,
-  "permissions": ["downloads", "tabs", "storage"],
+  "permissions": ["downloads", "activeTab", "storage", "scripting"],
+  "host_permissions": ["<all_urls>"],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "action": {
     "default_popup": "hello.html",
