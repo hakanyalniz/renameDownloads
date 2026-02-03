@@ -14,7 +14,6 @@ function getSiteData() {
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   if (request.action === "GET_PAGE_DATA") {
     const artistName = getSiteData();
-    console.log(artistName.innerText);
 
     try {
       sendResponse({ text: artistName.innerText });
@@ -27,3 +26,5 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   // Keeps the message channel open for the response
   return true;
 });
+
+// If twitter, make sure to download full version instead of thumbnail, add feature next time

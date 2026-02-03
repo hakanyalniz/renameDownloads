@@ -5,31 +5,39 @@ if (
   window.location.hostname === "twitter.com"
 ) {
   document.addEventListener("contextmenu", (e) => {
-    // find the entire tweet container first
-    const tweetCell = e.target.closest('[data-testid="cellInnerDiv"]');
+    // find the top-level modal container
+    const modal = e.target.closest('[role="dialog"]');
 
-    if (!tweetCell) return; // Click was outside a tweet
+    if (modal) {
+      // search down for the User-Name anywhere inside the modal
+      const userNameContainer = modal.querySelector(
+        '[data-testid="User-Name"]',
+      );
 
-    // jump to the User-Name landmark, which all tweets contain
-    const userNameContainer = tweetCell.querySelector(
-      '[data-testid="User-Name"]',
-    );
+      if (userNameContainer) {
+        const handleSpan =
+          userNameContainer.children[1]?.firstElementChild?.querySelector(
+            "span",
+          );
 
-    if (userNameContainer) {
-      // get the second child div, which contains the name and timestamp
-      // then grab the first div of that divs child, which contains just the name
-      const secondChildDiv = userNameContainer.children[1];
-      const profileChildDiv = secondChildDiv.firstElementChild;
-
-      if (profileChildDiv) {
-        // look for the span within this second div, which is where the name is written
-        const targetSpan = profileChildDiv.querySelector("span");
-
-        if (targetSpan) {
-          // This contains the "@handle" or the "·" separator
-
-          twitterProfileName = targetSpan;
+        if (handleSpan) {
+          twitterProfileName = handleSpan;
+          return; // Exit so we don't trigger the timeline logic
         }
+      }
+    }
+
+    // if not, then fallback for Timeline clicks (standard article check)
+    const timelineTweet = e.target.closest('[data-testid="tweet"]');
+    if (timelineTweet) {
+      // the below looks confusing, but it just navigating the divs to lookup UserName from the tweet
+      // element, then find the span, which contains the username
+      const handleSpan = timelineTweet
+        .querySelector('[data-testid="User-Name"]')
+        ?.children[1]?.firstElementChild?.querySelector("span");
+
+      if (handleSpan) {
+        twitterProfileName = handleSpan;
       }
     }
   });
