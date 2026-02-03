@@ -1,5 +1,6 @@
 const siteParsers = {
   "gelbooru.com": () => fetchGelbooruArtistName(),
+  "x.com": () => fetchTwitterArtistName(),
 };
 
 function getSiteData() {

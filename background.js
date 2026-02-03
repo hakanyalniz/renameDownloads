@@ -111,3 +111,15 @@ function changeFileName(downloadItem, suggest) {
 //   });
 //   return true;
 // }
+
+// Look into conditionals
+// function enableRenaming() {
+//   if (!chrome.downloads.onDeterminingFilename.hasListener(toggle)) {
+//     chrome.downloads.onDeterminingFilename.addListener(toggle);
+//   }
+// }
+
+// // Function to disable the feature
+// function disableRenaming() {
+//   chrome.downloads.onDeterminingFilename.removeListener(toggle);
+// }
