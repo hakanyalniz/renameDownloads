@@ -34,7 +34,7 @@ function sendChangeAccordingToSite(downloadItem, suggest) {
           if (response == "default") {
             changeFileName(downloadItem, suggest, currentTab);
           } else {
-            changeFileName(downloadItem, suggest, currentTab, response.text);
+            changeFileName(downloadItem, suggest, currentTab, response);
           }
         }
       },
@@ -74,12 +74,10 @@ async function changeFileName(
   downloadItem,
   suggest,
   currentTab,
-  suggestedTitle = "default",
+  suggestedResponse = "default",
 ) {
   // If the tab cannot be found or title is not found
   // or if it is undefined or title length is not enough, use default name
-  console.log(currentTab);
-
   if (
     !currentTab ||
     !currentTab.title ||
@@ -110,13 +108,13 @@ async function changeFileName(
     : "";
 
   // Finally suggest new file name
-  if (suggestedTitle == "default") {
+  if (suggestedResponse == "default" || suggestedResponse.text == "default") {
     suggest({
       filename: safeTitle + extension,
     });
   } else {
     suggest({
-      filename: suggestedTitle + extension,
+      filename: `${suggestedResponse.text}-${suggestedResponse.randomSalt}${extension}`,
     });
   }
   return true;

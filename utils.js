@@ -43,6 +43,31 @@ if (
   });
 }
 
+function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}
+// Randomly generate some string with variable length to put after file names
+function randomizeTitleGenerator() {
+  const letters = Array.from({ length: 26 }, (_, i) =>
+    String.fromCharCode(97 + i),
+  ); // a-z
+  const caps = Array.from({ length: 26 }, (_, i) =>
+    String.fromCharCode(65 + i),
+  ); // A-Z
+  const numbers = Array.from({ length: 10 }, (_, i) => i.toString()); // 0-9
+
+  const titlePool = [...letters, ...caps, ...numbers];
+  let randomlyGeneratedTitle = "";
+
+  for (let i = 0; i < 30; i++) {
+    randomlyGeneratedTitle = randomlyGeneratedTitle.concat(
+      "",
+      titlePool[getRandomInt(62)],
+    );
+  }
+  return randomlyGeneratedTitle;
+}
+
 function fetchGelbooruArtistName() {
   const artistName = document.querySelector(
     "#tag-list > li.tag-type-artist > a",

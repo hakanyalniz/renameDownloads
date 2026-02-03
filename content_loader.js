@@ -16,7 +16,10 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     const artistName = getSiteData();
 
     try {
-      sendResponse({ text: artistName.innerText });
+      sendResponse({
+        text: artistName.innerText.slice(1),
+        randomSalt: randomizeTitleGenerator(),
+      });
     } catch (error) {
       // Send default so we can use the default title in case an error occured
       sendResponse({ text: "default" });
