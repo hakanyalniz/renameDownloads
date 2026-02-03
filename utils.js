@@ -6,31 +6,31 @@ function fetchGelbooruArtistName() {
 }
 
 function fetchTwitterArtistName() {
-  let artistName = document.querySelector(
-    ".css-1jxf684.r-bcqeeo.r-1ttztb7.r-qvutc0.r-poiln3",
-  );
-  if (artistName) {
-    return artistName;
+  let xpath = `//*[starts-with(@id, 'id__')]/div[2]/div/div/a/div/span`;
+  let xpathResult = document.evaluate(
+    xpath,
+    document,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null,
+  ).singleNodeValue;
+
+  if (xpathResult) {
+    return xpathResult;
   }
-  artistName = document.querySelector(
-    "#id__qxc58u9rpai > div.css-175oi2r.r-18u37iz.r-1wbh5a2.r-1ez5h0i > div > div.css-175oi2r.r-1wbh5a2.r-dnmrzs > a > div > span",
-  );
-  if (artistName) {
-    return artistName;
-  }
-  artistName = document.querySelector(
-    "#id__lvv7w8fxpe > div:nth-child(2) > div > div > a > div > span",
-  );
-  if (artistName) {
-    return artistName;
+
+  xpath = `//*[starts-with(@id, 'id__')]/div[2]/div/div[1]/a/div/span`;
+  xpathResult = document.evaluate(
+    xpath,
+    document,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null,
+  ).singleNodeValue;
+
+  if (xpathResult) {
+    return xpathResult;
   } else {
     return null;
   }
 }
-
-// class
-// css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3
-// homepage path
-// document.querySelector("#id__qxc58u9rpai > div.css-175oi2r.r-18u37iz.r-1wbh5a2.r-1ez5h0i > div > div.css-175oi2r.r-1wbh5a2.r-dnmrzs > a > div > span")
-// profile path
-// document.querySelector("#id__lvv7w8fxpe > div:nth-child(2) > div > div > a > div > span")

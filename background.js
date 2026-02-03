@@ -13,7 +13,32 @@ function onDetermine(downloadItem, suggest) {
       suggest();
       return false;
     }
-    changeFileName(downloadItem, suggest);
+    sendChangeAccordingToSite(downloadItem, suggest);
+  });
+  return true;
+}
+
+function sendChangeAccordingToSite(downloadItem, suggest) {
+  getCurrentTab().then((currentTab) => {
+    chrome.tabs.sendMessage(
+      currentTab.id,
+      { action: "GET_PAGE_DATA" },
+      (response) => {
+        console.log(response);
+
+        // Check if the content script replied
+        if (chrome.runtime.lastError || !response) {
+          console.log("An error occurred");
+          changeFileName(downloadItem, suggest, currentTab);
+        } else {
+          if (response == "default") {
+            changeFileName(downloadItem, suggest, currentTab);
+          } else {
+            changeFileName(downloadItem, suggest, currentTab, response.text);
+          }
+        }
+      },
+    );
   });
   return true;
 }
@@ -45,46 +70,55 @@ function getInputLength() {
   });
 }
 
-function changeFileName(downloadItem, suggest) {
-  getCurrentTab().then(async (currentTab) => {
-    // If the tab cannot be found or title is not found
-    // or if it is undefined or title length is not enough, use default name
-    console.log(currentTab);
+async function changeFileName(
+  downloadItem,
+  suggest,
+  currentTab,
+  suggestedTitle = "default",
+) {
+  // If the tab cannot be found or title is not found
+  // or if it is undefined or title length is not enough, use default name
+  console.log(currentTab);
 
-    if (
-      !currentTab ||
-      !currentTab.title ||
-      currentTab === undefined ||
-      currentTab.title.length <= 0
-    ) {
-      suggest();
-      return;
-    }
+  if (
+    !currentTab ||
+    !currentTab.title ||
+    currentTab === undefined ||
+    currentTab.title.length <= 0
+  ) {
+    suggest();
+    return;
+  }
 
-    // Trim the title to be useable as a file name
-    // Also slice it to keep it short
-    const safeTitle = currentTab.title
-      .replace(/[<>:"/\\|?*]+/g, "")
-      .trim()
-      .slice(0, await getInputLength());
+  // Trim the title to be useable as a file name
+  // Also slice it to keep it short
+  const safeTitle = currentTab.title
+    .replace(/[<>:"/\\|?*]+/g, "")
+    .trim()
+    .slice(0, await getInputLength());
 
-    // If safeTitle does not exist, use default name
-    if (!safeTitle) {
-      suggest();
-      return;
-    }
+  // If safeTitle does not exist, use default name
+  if (!safeTitle) {
+    suggest();
+    return;
+  }
 
-    // Fetches the file extension (like jpeg or png)
-    const originalFilename = downloadItem.filename;
-    const extension = originalFilename.includes(".")
-      ? "." + originalFilename.split(".").pop()
-      : "";
+  // Fetches the file extension (like jpeg or png)
+  const originalFilename = downloadItem.filename;
+  const extension = originalFilename.includes(".")
+    ? "." + originalFilename.split(".").pop()
+    : "";
 
-    // Finally suggest new file name
+  // Finally suggest new file name
+  if (suggestedTitle == "default") {
     suggest({
       filename: safeTitle + extension,
     });
-  });
+  } else {
+    suggest({
+      filename: suggestedTitle + extension,
+    });
+  }
   return true;
 }
 
