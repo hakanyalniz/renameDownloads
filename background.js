@@ -24,8 +24,6 @@ function sendChangeAccordingToSite(downloadItem, suggest) {
       currentTab.id,
       { action: "GET_PAGE_DATA" },
       (response) => {
-        console.log(response);
-
         // Check if the content script replied
         if (chrome.runtime.lastError || !response) {
           console.log("An error occurred");
@@ -121,28 +119,6 @@ async function changeFileName(
 }
 
 // Make titles more customizable
-
-// function onDetermine(downloadItem, suggest) {
-//   getCurrentTab().then((currentTab) => {
-//     chrome.tabs.sendMessage(
-//       currentTab.id,
-//       { action: "GET_PAGE_DATA" },
-//       (response) => {
-//         // Check if the content script replied
-//         if (chrome.runtime.lastError || !response) {
-//           console.log("An error occured");
-//         } else {
-//           if (response == "default") {
-//             changeFileName(downloadItem, suggest, currentTab);
-//           } else {
-//             changeFileName(downloadItem, suggest, currentTab, response.text);
-//           }
-//         }
-//       },
-//     );
-//   });
-//   return true;
-// }
 
 // Look into conditionals
 // function enableRenaming() {

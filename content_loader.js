@@ -21,7 +21,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
         randomSalt: randomizeTitleGenerator(),
       });
     } catch (error) {
-      // Send default so we can use the default title in case an error occured
+      // Send default so we can use the default title in case an error occurred
       sendResponse({ text: "default" });
       console.error("Scraping failed:", error);
     }
