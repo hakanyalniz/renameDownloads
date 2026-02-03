@@ -1,3 +1,5 @@
+const mainElement = document.querySelector("main");
+
 const siteParsers = {
   "gelbooru.com": () => fetchGelbooruArtistName(),
   "x.com": () => fetchTwitterArtistName(),
@@ -10,11 +12,9 @@ function getSiteData() {
 }
 
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
-  console.log("message");
-
   if (request.action === "GET_PAGE_DATA") {
     const artistName = getSiteData();
-    console.log("artistName", artistName);
+    console.log(artistName.innerText);
 
     try {
       sendResponse({ text: artistName.innerText });
