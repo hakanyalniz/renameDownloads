@@ -120,6 +120,33 @@ async function changeFileName(
   return true;
 }
 
+// If download is from twitter and it is small compressed version, retrigger download with original version
+chrome.downloads.onCreated.addListener((downloadItem) => {
+  // check if its a Twitter image and NOT already the 'orig' version
+  if (
+    downloadItem.url.includes("pbs.twimg.com") &&
+    !downloadItem.url.includes("name=orig")
+  ) {
+    // cancel the low-res download immediately
+    chrome.downloads.cancel(downloadItem.id, () => {
+      // modify the URL to request the original quality
+      // this regex replaces any name=... value with name=orig
+      const originalUrl = downloadItem.url.replace(/name=[^&]+/, "name=orig");
+
+      // Erase removes it from the downloads shelf and history
+      // if not erased, other listeners will try to interact with it
+      chrome.downloads.erase({ id: downloadItem.id });
+
+      // start the new download
+      chrome.downloads.download({
+        url: originalUrl,
+        filename: "temp_filename",
+        conflictAction: "uniquify",
+      });
+    });
+  }
+});
+
 // Make titles more customizable
 
 // Look into conditionals
@@ -137,3 +164,4 @@ async function changeFileName(
 // If twitter, make sure to download full version instead of thumbnail, add feature next time
 
 // There seems to be a bug, where the content loader is not properly loading and scraping the site, possibly due to using document as event listener container?
+// There was a bug where tab id could not be fetched
