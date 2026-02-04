@@ -18,14 +18,14 @@ function onDetermine(downloadItem, suggest) {
   return true;
 }
 
+// Send message to content script, which will fetch the downloaded images profile name
+// we use that as a suggestion and add salt it to create new title
 function sendChangeAccordingToSite(downloadItem, suggest) {
   getCurrentTab().then((currentTab) => {
     chrome.tabs.sendMessage(
       currentTab.id,
       { action: "GET_PAGE_DATA" },
       (response) => {
-        console.log("response", response);
-
         // Check if the content script replied
         if (chrome.runtime.lastError || !response) {
           console.log("An error occurred");
@@ -147,7 +147,7 @@ chrome.downloads.onCreated.addListener((downloadItem) => {
   }
 });
 
-// Make titles more customizable
+// Allow the changing of download location
 
 // Look into conditionals
 // function enableRenaming() {
@@ -160,8 +160,3 @@ chrome.downloads.onCreated.addListener((downloadItem) => {
 // function disableRenaming() {
 //   chrome.downloads.onDeterminingFilename.removeListener(toggle);
 // }
-
-// If twitter, make sure to download full version instead of thumbnail, add feature next time
-
-// There seems to be a bug, where the content loader is not properly loading and scraping the site, possibly due to using document as event listener container?
-// There was a bug where tab id could not be fetched
