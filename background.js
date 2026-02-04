@@ -110,11 +110,11 @@ async function changeFileName(
   // Finally suggest new file name
   if (suggestedResponse == "default" || suggestedResponse.text == "default") {
     suggest({
-      filename: safeTitle + extension,
+      filename: `/NamedDownloads/${safeTitle}${extension}`,
     });
   } else {
     suggest({
-      filename: `${suggestedResponse.text}-${suggestedResponse.randomSalt}${extension}`,
+      filename: `NamedDownloads/${suggestedResponse.text}-${suggestedResponse.randomSalt}${extension}`,
     });
   }
   return true;
