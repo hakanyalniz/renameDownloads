@@ -4,7 +4,7 @@ if (
   window.location.hostname === "x.com" ||
   window.location.hostname === "twitter.com"
 ) {
-  document.addEventListener("contextmenu", (e) => {
+  document.addEventListener("mousedown", (e) => {
     // find the top-level modal container
     const modal = e.target.closest('[role="dialog"]');
 

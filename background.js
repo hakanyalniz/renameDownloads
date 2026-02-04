@@ -24,6 +24,8 @@ function sendChangeAccordingToSite(downloadItem, suggest) {
       currentTab.id,
       { action: "GET_PAGE_DATA" },
       (response) => {
+        console.log("response", response);
+
         // Check if the content script replied
         if (chrome.runtime.lastError || !response) {
           console.log("An error occurred");
@@ -131,3 +133,7 @@ async function changeFileName(
 // function disableRenaming() {
 //   chrome.downloads.onDeterminingFilename.removeListener(toggle);
 // }
+
+// If twitter, make sure to download full version instead of thumbnail, add feature next time
+
+// There seems to be a bug, where the content loader is not properly loading and scraping the site, possibly due to using document as event listener container?
