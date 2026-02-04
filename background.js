@@ -137,7 +137,7 @@ chrome.downloads.onCreated.addListener((downloadItem) => {
       // if not erased, other listeners will try to interact with it
       chrome.downloads.erase({ id: downloadItem.id });
 
-      // start the new download
+      // start the new download, filename is not important since we will change it
       chrome.downloads.download({
         url: originalUrl,
         filename: "temp_filename",
