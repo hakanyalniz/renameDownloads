@@ -2,6 +2,9 @@ chrome.downloads.onDeterminingFilename.addListener(onDetermine);
 
 let toggleSwitch = false;
 let titleLength = 100;
+// Store the timestamp when the background script/service worker starts
+// This is needed to prevent download onCreated from running for older downloads
+const sessionStartTime = Date.now();
 
 // Wrapper function for changeFileName, so we can safely add or remove listeners to it
 // Send message to get current tab artist name for specific sites
@@ -122,6 +125,13 @@ async function changeFileName(
 
 // If download is from twitter and it is small compressed version, retrigger download with original version
 chrome.downloads.onCreated.addListener((downloadItem) => {
+  const itemDate = new Date(downloadItem.startTime).getTime();
+
+  // If the download started before this extension session, ignore it immediately
+  if (itemDate < sessionStartTime) {
+    return;
+  }
+
   // check if its a Twitter image and NOT already the 'orig' version
   if (
     downloadItem.url.includes("pbs.twimg.com") &&
