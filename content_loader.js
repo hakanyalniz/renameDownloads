@@ -16,7 +16,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     const artistName = getSiteData();
     try {
       sendResponse({
-        text: artistName.innerText.slice(1),
+        text: artistName,
         randomSalt: randomizeTitleGenerator(),
       });
     } catch (error) {

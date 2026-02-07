@@ -72,11 +72,15 @@ function fetchGelbooruArtistName() {
   const artistName = document.querySelector(
     "#tag-list > li.tag-type-artist > a",
   );
-  return artistName;
+  return artistName.innerText;
 }
 
 function fetchTwitterArtistName() {
   if (twitterProfileName) {
+    if (twitterProfileName.innerText.slice(0, 1) == "@") {
+      twitterProfileName = twitterProfileName.innerText.slice(1);
+    }
+
     return twitterProfileName;
   } else {
     return null;

@@ -141,7 +141,10 @@ chrome.downloads.onCreated.addListener((downloadItem) => {
     chrome.downloads.cancel(downloadItem.id, () => {
       // modify the URL to request the original quality
       // this regex replaces any name=... value with name=orig
-      const originalUrl = downloadItem.url.replace(/name=[^&]+/, "name=orig");
+      const origQualityUrl = downloadItem.url.replace(
+        /name=[^&]+/,
+        "name=orig",
+      );
 
       // Erase removes it from the downloads shelf and history
       // if not erased, other listeners will try to interact with it
@@ -149,7 +152,7 @@ chrome.downloads.onCreated.addListener((downloadItem) => {
 
       // start the new download, filename is not important since we will change it
       chrome.downloads.download({
-        url: originalUrl,
+        url: origQualityUrl,
         filename: "temp_filename",
         conflictAction: "uniquify",
       });
