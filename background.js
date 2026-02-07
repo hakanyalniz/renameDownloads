@@ -30,7 +30,7 @@ function sendChangeAccordingToSite(downloadItem, suggest) {
       { action: "GET_PAGE_DATA" },
       (response) => {
         // Check if the content script replied
-        if (chrome.runtime.lastError || !response) {
+        if (chrome.runtime.lastError || response == null) {
           console.log("An error occurred");
           changeFileName(downloadItem, suggest, currentTab);
         } else {
