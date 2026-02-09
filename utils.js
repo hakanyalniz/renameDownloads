@@ -77,7 +77,15 @@ function fetchGelbooruArtistName() {
 
 function fetchTwitterArtistName() {
   if (twitterProfileName) {
-    if (twitterProfileName.innerText.slice(0, 1) == "@") {
+    // Checking for object here to verify if variable contains HTML tag and therefore innerText
+    // If variable is already string, then there is no need to assign innerText
+    // Also, if there is an album and a second download triggers, the twitter event listener would
+    // only run once and twitterProfileName would stay same as the previous profile name, without @
+    // so there is also no need to remove that
+    if (
+      typeof twitterProfileName == "object" &&
+      twitterProfileName.innerText.slice(0, 1) == "@"
+    ) {
       twitterProfileName = twitterProfileName.innerText.slice(1);
     }
 
