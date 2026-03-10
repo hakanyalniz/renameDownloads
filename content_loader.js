@@ -8,21 +8,28 @@ const siteParsers = {
 function getSiteData() {
   const host = window.location.hostname.replace("www.", "");
   const scraper = siteParsers[host];
-  return scraper();
+  if (scraper) {
+    return scraper();
+  } else {
+    return "default";
+  }
 }
 
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   if (request.action === "GET_PAGE_DATA") {
     const artistName = getSiteData();
+    console.log("artistName", artistName);
 
     try {
-      sendResponse({
-        text: artistName,
-        randomSalt: randomizeTitleGenerator(),
-      });
+      if (artistName === "default") {
+        sendResponse({ text: "default" });
+      } else {
+        sendResponse({
+          text: artistName,
+          randomSalt: randomizeTitleGenerator(),
+        });
+      }
     } catch (error) {
-      // Send default so we can use the default title in case an error occurred
-      sendResponse({ text: "default" });
       console.error("Scraping failed:", error);
     }
   }

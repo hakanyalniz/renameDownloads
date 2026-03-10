@@ -29,6 +29,9 @@ function sendChangeAccordingToSite(downloadItem, suggest) {
       currentTab.id,
       { action: "GET_PAGE_DATA" },
       (response) => {
+        console.log("response", response);
+        console.log("suggest", suggest);
+
         // Check if the content script replied
         if (chrome.runtime.lastError || response == null) {
           console.log("An error occurred");
@@ -111,6 +114,7 @@ async function changeFileName(
     : "";
 
   // Finally suggest new file name
+  // suggestedResponse is the fetched author name meanwhile safeTitle is currentTab title
   if (suggestedResponse == "default" || suggestedResponse.text == "default") {
     suggest({
       filename: `NamedDownloads/${safeTitle}${extension}`,
@@ -161,6 +165,8 @@ chrome.downloads.onCreated.addListener((downloadItem) => {
 });
 
 // Allow the changing of download location
+
+// The bug is happening specifically in some websites, it seems like suggest is being called without a download starting
 
 // Look into conditionals
 // function enableRenaming() {
