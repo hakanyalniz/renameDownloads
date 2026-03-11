@@ -37,7 +37,9 @@ function sendChangeAccordingToSite(downloadItem, suggest) {
           console.log("An error occurred");
           changeFileName(downloadItem, suggest, currentTab);
         } else {
-          if (response == "default") {
+          if (response.text == "default") {
+            console.log("Default call");
+
             changeFileName(downloadItem, suggest, currentTab);
           } else {
             changeFileName(downloadItem, suggest, currentTab, response);
