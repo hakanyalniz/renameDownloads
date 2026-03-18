@@ -1,5 +1,8 @@
 chrome.downloads.onDeterminingFilename.addListener(onDetermine);
 
+// A registry of IDs that we have intentionally canceled
+const canceledDownloads = new Set();
+
 let toggleSwitch = false;
 let titleLength = 100;
 // Store the timestamp when the background script/service worker starts
@@ -9,6 +12,12 @@ const sessionStartTime = Date.now();
 // Wrapper function for changeFileName, so we can safely add or remove listeners to it
 // Send message to get current tab artist name for specific sites
 function onDetermine(downloadItem, suggest) {
+  // If the ID is in our cancel list, bail out immediately
+  if (canceledDownloads.has(downloadItem.id)) {
+    suggest();
+    return;
+  }
+
   chrome.storage.local.get("toggleSwitch", (result) => {
     toggleSwitch = result.toggleSwitch ?? false;
 
@@ -86,6 +95,8 @@ async function changeFileName(
 ) {
   // If the tab cannot be found or title is not found
   // or if it is undefined or title length is not enough, use default name
+  console.log("downloadItem", downloadItem);
+
   if (
     !currentTab ||
     !currentTab.title ||
@@ -114,6 +125,7 @@ async function changeFileName(
   const extension = originalFilename.includes(".")
     ? "." + originalFilename.split(".").pop()
     : "";
+  console.log(" change file name ");
 
   // Finally suggest new file name
   // suggestedResponse is the fetched author name meanwhile safeTitle is currentTab title
@@ -133,18 +145,37 @@ async function changeFileName(
 chrome.downloads.onCreated.addListener((downloadItem) => {
   const itemDate = new Date(downloadItem.startTime).getTime();
 
+  console.log("Download detected");
+
   // If the download started before this extension session, ignore it immediately
   if (itemDate < sessionStartTime) {
     return;
   }
+  console.log(
+    "Twitter checks",
+    downloadItem.url.includes("pbs.twimg.com") &&
+      !downloadItem.url.includes("name=orig"),
+  );
+
+  console.log("twitter check 2", downloadItem);
 
   // check if its a Twitter image and NOT already the 'orig' version
   if (
     downloadItem.url.includes("pbs.twimg.com") &&
     !downloadItem.url.includes("name=orig")
   ) {
+    console.log("Twitter detected", downloadItem);
+
+    // Mark this ID as "to be ignored"
+    canceledDownloads.add(downloadItem.id);
+
     // cancel the low-res download immediately
     chrome.downloads.cancel(downloadItem.id, () => {
+      if (chrome.runtime.lastError) {
+        console.error("Cancel failed:", chrome.runtime.lastError.message);
+        return;
+      }
+
       // modify the URL to request the original quality
       // this regex replaces any name=... value with name=orig
       const origQualityUrl = downloadItem.url.replace(
@@ -154,7 +185,16 @@ chrome.downloads.onCreated.addListener((downloadItem) => {
 
       // Erase removes it from the downloads shelf and history
       // if not erased, other listeners will try to interact with it
-      chrome.downloads.erase({ id: downloadItem.id });
+      chrome.downloads.erase({ id: downloadItem.id }, (erasedID) => {
+        if (chrome.runtime.lastError) {
+          console.error("Erase failed:", chrome.runtime.lastError.message);
+        } else {
+          console.log(
+            "Download record erased from history. ID removed:",
+            erasedID,
+          );
+        }
+      });
 
       // start the new download, filename is not important since we will change it
       chrome.downloads.download({
@@ -167,6 +207,7 @@ chrome.downloads.onCreated.addListener((downloadItem) => {
 });
 
 // Allow the changing of download location
+// For some reason, in incognito mode, the bug happens
 
 // The bug is happening specifically in some websites, it seems like suggest is being called without a download starting
 
