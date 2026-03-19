@@ -12,9 +12,12 @@ const sessionStartTime = Date.now();
 // Wrapper function for changeFileName, so we can safely add or remove listeners to it
 // Send message to get current tab artist name for specific sites
 function onDetermine(downloadItem, suggest) {
+  console.log("onDetermine");
+
   // If the ID is in our cancel list, bail out immediately
   if (canceledDownloads.has(downloadItem.id)) {
     suggest();
+    canceledDownloads.delete(downloadItem.id);
     return;
   }
 
@@ -95,8 +98,6 @@ async function changeFileName(
 ) {
   // If the tab cannot be found or title is not found
   // or if it is undefined or title length is not enough, use default name
-  console.log("downloadItem", downloadItem);
-
   if (
     !currentTab ||
     !currentTab.title ||
@@ -125,7 +126,6 @@ async function changeFileName(
   const extension = originalFilename.includes(".")
     ? "." + originalFilename.split(".").pop()
     : "";
-  console.log(" change file name ");
 
   // Finally suggest new file name
   // suggestedResponse is the fetched author name meanwhile safeTitle is currentTab title
@@ -145,27 +145,17 @@ async function changeFileName(
 chrome.downloads.onCreated.addListener((downloadItem) => {
   const itemDate = new Date(downloadItem.startTime).getTime();
 
-  console.log("Download detected");
-
   // If the download started before this extension session, ignore it immediately
   if (itemDate < sessionStartTime) {
+    console.log("Session date error");
     return;
   }
-  console.log(
-    "Twitter checks",
-    downloadItem.url.includes("pbs.twimg.com") &&
-      !downloadItem.url.includes("name=orig"),
-  );
-
-  console.log("twitter check 2", downloadItem);
 
   // check if its a Twitter image and NOT already the 'orig' version
   if (
     downloadItem.url.includes("pbs.twimg.com") &&
     !downloadItem.url.includes("name=orig")
   ) {
-    console.log("Twitter detected", downloadItem);
-
     // Mark this ID as "to be ignored"
     canceledDownloads.add(downloadItem.id);
 
@@ -176,38 +166,32 @@ chrome.downloads.onCreated.addListener((downloadItem) => {
         return;
       }
 
-      // modify the URL to request the original quality
-      // this regex replaces any name=... value with name=orig
-      const origQualityUrl = downloadItem.url.replace(
-        /name=[^&]+/,
-        "name=orig",
-      );
-
       // Erase removes it from the downloads shelf and history
       // if not erased, other listeners will try to interact with it
       chrome.downloads.erase({ id: downloadItem.id }, (erasedID) => {
         if (chrome.runtime.lastError) {
           console.error("Erase failed:", chrome.runtime.lastError.message);
-        } else {
-          console.log(
-            "Download record erased from history. ID removed:",
-            erasedID,
-          );
         }
       });
+    });
 
-      // start the new download, filename is not important since we will change it
-      chrome.downloads.download({
-        url: origQualityUrl,
-        filename: "temp_filename",
-        conflictAction: "uniquify",
-      });
+    // modify the URL to request the original quality
+    // this regex replaces any name=... value with name=orig
+    const origQualityUrl = downloadItem.url.replace(/name=[^&]+/, "name=orig");
+
+    // start the new download, filename is not important since we will change it
+    chrome.downloads.download({
+      url: origQualityUrl,
+      filename: "temp_filename",
+      conflictAction: "uniquify",
     });
   }
 });
 
 // Allow the changing of download location
 // For some reason, in incognito mode, the bug happens
+
+// Session date error happens
 
 // The bug is happening specifically in some websites, it seems like suggest is being called without a download starting
 
