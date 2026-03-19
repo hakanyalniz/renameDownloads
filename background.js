@@ -145,8 +145,12 @@ async function changeFileName(
 chrome.downloads.onCreated.addListener((downloadItem) => {
   const itemDate = new Date(downloadItem.startTime).getTime();
 
+  console.log("sessionStartTime", sessionStartTime);
+  console.log("itemDate", itemDate);
+
   // If the download started before this extension session, ignore it immediately
-  if (itemDate < sessionStartTime) {
+  // When the download awakens the listener, the sessionStartTime might fall behind, so a grace period is added
+  if (itemDate < sessionStartTime - 5000) {
     console.log("Session date error");
     return;
   }
