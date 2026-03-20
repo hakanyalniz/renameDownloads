@@ -9,31 +9,27 @@ let titleLength = 100;
 // This is needed to prevent download onCreated from running for older downloads
 const sessionStartTime = Date.now();
 
-// Fetch toggle switch from local storage
-// this will decide whether the extension gets triggered or not
-chrome.storage.local.get("toggleSwitch", (result) => {
-  console.log("test");
-
-  toggleSwitch = result.toggleSwitch ?? false;
-
-  if (!toggleSwitch) {
-    suggest();
-    return false;
-  }
-  sendChangeAccordingToSite(downloadItem, suggest);
-});
-
 // Wrapper function for changeFileName, so we can safely add or remove listeners to it
 // Send message to get current tab artist name for specific sites
 function onDetermine(downloadItem, suggest) {
-  console.log("onDetermine");
-
   // If the ID is in our cancel list, bail out immediately
   if (canceledDownloads.has(downloadItem.id)) {
     suggest();
     canceledDownloads.delete(downloadItem.id);
     return;
   }
+
+  // Fetch toggle switch from local storage
+  // this will decide whether the extension gets triggered or not
+  chrome.storage.local.get("toggleSwitch", (result) => {
+    toggleSwitch = result.toggleSwitch ?? false;
+
+    if (!toggleSwitch) {
+      suggest();
+      return false;
+    }
+    sendChangeAccordingToSite(downloadItem, suggest);
+  });
 
   return true;
 }
@@ -147,16 +143,20 @@ async function changeFileName(
 }
 
 // If download is from twitter and it is small compressed version, retrigger download with original version
-chrome.downloads.onCreated.addListener((downloadItem) => {
-  const itemDate = new Date(downloadItem.startTime).getTime();
+chrome.downloads.onCreated.addListener(async (downloadItem) => {
+  // If toggle is off, then there is no need to check time, name or quality or anything else
+  // Doing so will only hinder ordinary downloads, preventing file location selection
+  const result = await chrome.storage.local.get("toggleSwitch");
+  toggleSwitch = result.toggleSwitch ?? false;
+  if (!toggleSwitch) {
+    return;
+  }
 
-  console.log("sessionStartTime", sessionStartTime);
-  console.log("itemDate", itemDate);
+  const itemDate = new Date(downloadItem.startTime).getTime();
 
   // If the download started before this extension session, ignore it immediately
   // When the download awakens the listener, the sessionStartTime might fall behind, so a grace period is added
   if (itemDate < sessionStartTime - 5000) {
-    console.log("Session date error");
     return;
   }
 
