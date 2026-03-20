@@ -9,6 +9,20 @@ let titleLength = 100;
 // This is needed to prevent download onCreated from running for older downloads
 const sessionStartTime = Date.now();
 
+// Fetch toggle switch from local storage
+// this will decide whether the extension gets triggered or not
+chrome.storage.local.get("toggleSwitch", (result) => {
+  console.log("test");
+
+  toggleSwitch = result.toggleSwitch ?? false;
+
+  if (!toggleSwitch) {
+    suggest();
+    return false;
+  }
+  sendChangeAccordingToSite(downloadItem, suggest);
+});
+
 // Wrapper function for changeFileName, so we can safely add or remove listeners to it
 // Send message to get current tab artist name for specific sites
 function onDetermine(downloadItem, suggest) {
@@ -21,15 +35,6 @@ function onDetermine(downloadItem, suggest) {
     return;
   }
 
-  chrome.storage.local.get("toggleSwitch", (result) => {
-    toggleSwitch = result.toggleSwitch ?? false;
-
-    if (!toggleSwitch) {
-      suggest();
-      return false;
-    }
-    sendChangeAccordingToSite(downloadItem, suggest);
-  });
   return true;
 }
 
@@ -195,7 +200,8 @@ chrome.downloads.onCreated.addListener((downloadItem) => {
 // Allow the changing of download location
 // For some reason, in incognito mode, the bug happens
 
-// Session date error happens
+// Download videos
+// download location does not show on twitter
 
 // The bug is happening specifically in some websites, it seems like suggest is being called without a download starting
 
